@@ -194,3 +194,9 @@ Akış açıkken imleci sorunlu pencerenin üzerine götürün.
 Bu kayıtlar `debug` seviyesindedir; diske yazılmaz, yalnızca yukarıdaki komut
 çalışırken üretilir. Sorun bildirirken bu çıktıyı ve imlecin pencerenin neresinde
 olduğunu ekleyin.
+
+---
+
+## Lisans
+
+[MIT](LICENSE) — Copyright (c) 2026 Akın Aksoy
