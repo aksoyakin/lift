@@ -1,0 +1,13 @@
+# Derleme çıktıları
+build/
+DerivedData/
+*.xcarchive
+*.dmg
+
+# Xcode kullanıcı durumu
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# macOS
+.DS_Store
