@@ -23,7 +23,15 @@ karar vermek.**
 
 ## Kurulum
 
-### İndir
+### Homebrew ile
+
+```sh
+brew install --cask aksoyakin/lift/lift
+```
+
+Güncellemek için `brew upgrade --cask lift`.
+
+### Elle
 
 [**Releases**](../../releases) sayfasından en son `Lift-x.y.dmg` dosyasını indirin,
 açın ve `Lift.app`'i `Applications` klasörüne sürükleyin.
@@ -52,6 +60,7 @@ Menü çubuğundaki ikona tıklayın:
 | **Etkin** ⌘E | Odak takibini aç/kapat |
 | **Gecikme** | Anında · 100 ms · 150 ms · 300 ms · 500 ms |
 | **Girişte başlat** | Oturum açılışında otomatik başlat |
+| **Güncellemeleri denetle** | Yeni sürüm varsa başlığı değişir; tıklayınca indirme sayfasını açar |
 | **Çıkış** ⌘Q | |
 
 Ayarlar anında etkilidir.
@@ -100,6 +109,10 @@ alt ağacına düşer; nadiren pencereye ulaşılamayabilir.
 **Space ve tam ekran algılanmaz.** Bu sürümde kapsam dışı.
 
 **Arayüz yalnızca Türkçedir.**
+
+**Güncelleme otomatik kurulmaz.** Uygulama açılışta GitHub'a sorarak yeni sürüm
+olup olmadığına bakar ve varsa menüde belirtir; indirme ve kurulum size kalır.
+Homebrew ile kurduysanız `brew upgrade --cask lift` yeterlidir.
 
 ---
 
@@ -157,9 +170,10 @@ derlendiği için menü çubuğu menüsünde gözle görülür takılmaya yol a�
 | `FocusEngine.swift` | Karar mantığı: kilitler ve debounce |
 | `FocusActions.swift` | Fiili odaklama |
 | `MenuBarController.swift` | NSStatusItem menüsü |
+| `UpdateChecker.swift` | Sürüm karşılaştırma ve GitHub sorgusu |
 
 `FocusEngine` hiçbir somut sınıfa bağlı değildir; yalnızca protokollere. Ekran,
-zaman ve zamanlayıcı bağımlılıkları dışarıdan verilir — bu sayede 23 birim testi
+zaman ve zamanlayıcı bağımlılıkları dışarıdan verilir — bu sayede 33 birim testi
 ekranda pencere açmadan ve gerçek zaman beklemeden, milisaniyeler içinde çalışır.
 
 ```sh

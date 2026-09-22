@@ -4,6 +4,7 @@ import os
 
 final class MenuBarController: NSObject, NSMenuDelegate {
     private static let statusIconName = "cursorarrow.rays"
+    private static let releasesURL = URL(string: "https://github.com/aksoyakin/lift/releases/latest")!
 
     private let settings: SettingsStore
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Lift", category: "MenuBarController")
@@ -14,9 +15,15 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     private let enabledItem = NSMenuItem(title: "Etkin", action: nil, keyEquivalent: "e")
     private let delayItem = NSMenuItem(title: "Gecikme", action: nil, keyEquivalent: "")
     private let launchAtLoginItem = NSMenuItem(title: "Girişte başlat", action: nil, keyEquivalent: "")
+    private let updateItem = NSMenuItem(title: "Güncellemeleri denetle", action: nil, keyEquivalent: "")
     private var delayOptionItems: [NSMenuItem] = []
 
     var onMenuTrackingChange: ((Bool) -> Void)?
+    var onCheckForUpdates: (() -> Void)?
+
+    var availableUpdate: String? {
+        didSet { refreshState() }
+    }
 
     init(settings: SettingsStore = .shared) {
         self.settings = settings
@@ -62,6 +69,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
 
+        updateItem.target = self
+        updateItem.action = #selector(checkForUpdates)
+        menu.addItem(updateItem)
+
         let quitItem = NSMenuItem(title: "Çıkış", action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -106,6 +117,15 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         refreshState()
     }
 
+    @objc private func checkForUpdates() {
+        guard let version = availableUpdate else {
+            onCheckForUpdates?()
+            return
+        }
+        NSWorkspace.shared.open(Self.releasesURL)
+        logger.notice("Sürüm sayfası açıldı: \(version, privacy: .public)")
+    }
+
     @objc private func quit() {
         NSApp.terminate(nil)
     }
@@ -121,5 +141,11 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             item.state = item.tag == currentDelay ? .on : .off
         }
         delayItem.title = "Gecikme (\(Self.delayTitle(forMilliseconds: currentDelay)))"
+
+        if let availableUpdate {
+            updateItem.title = "Yeni sürüm var: \(availableUpdate)"
+        } else {
+            updateItem.title = "Güncellemeleri denetle"
+        }
     }
 }
