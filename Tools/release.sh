@@ -101,6 +101,21 @@ step "Apple'a gönderiliyor (birkaç dakika sürebilir)"
 xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
 
 step "Bilet iliştiriliyor"
+# Önce uygulamaya, sonra DMG'ye. Yalnızca DMG'ye iliştirmek yetmez: kullanıcı
+# uygulamayı Applications'a kopyaladığında bilet dosyanın içinde taşınmaz ve
+# Gatekeeper onu Apple'dan çevrimiçi sorgulamak zorunda kalır.
+xcrun stapler staple "$APP"
+
+# Uygulama değiştiği için DMG yeniden paketlenip imzalanmalı.
+rm -rf "$STAGING" "$DMG"
+mkdir -p "$STAGING"
+cp -R "$APP" "$STAGING/"
+ln -s /Applications "$STAGING/Applications"
+hdiutil create -volname "Lift" -srcfolder "$STAGING" -ov -format UDZO "$DMG" >/dev/null
+codesign --sign "Developer ID Application" --timestamp "$DMG"
+
+# Yeni DMG'nin kendisi de notarize edilip biletlenmeli.
+xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
 xcrun stapler staple "$DMG"
 
 # ─── Son doğrulama ──────────────────────────────────────────────────────────
