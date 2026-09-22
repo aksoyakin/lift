@@ -187,6 +187,19 @@ Kodu okumak için önerilen sıra: `main.swift` → `AppDelegate.swift` →
 
 ---
 
+## Yeni sürüm yayımlama
+
+```sh
+Tools/release.sh 1.1     # derle, Developer ID ile imzala, notarize et, bilet iliştir
+Tools/publish.sh 1.1     # etiketle, GitHub Release aç, Homebrew cask'ini güncelle
+```
+
+İkisi de idempotenttir; yarıda kalırsa tekrar çalıştırılabilir. `publish.sh`
+yayımladıktan sonra paketi GitHub'dan indirip sha256 ve Gatekeeper denetimini
+doğrular. Sürüm notu için `Tools/release-notes/<sürüm>.md` varsa kullanılır.
+
+---
+
 ## Bir pencereye odak geçmiyorsa
 
 Her uygulama erişilebilirlik bilgisini kendi sağlar ve standarda uyma derecesi
