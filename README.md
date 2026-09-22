@@ -112,7 +112,7 @@ macOS 13 veya üzeri. Apple Silicon ve Intel desteklenir.
 ## Kaynak koddan derleme
 
 ```sh
-git clone <repo-url> && cd lift
+git clone https://github.com/aksoyakin/lift.git && cd lift
 xcodebuild -project Lift.xcodeproj -scheme Lift -configuration Release build
 open ~/Library/Developer/Xcode/DerivedData/Lift-*/Build/Products/Release/Lift.app
 ```
