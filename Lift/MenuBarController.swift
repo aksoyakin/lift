@@ -25,6 +25,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         didSet { refreshState() }
     }
 
+    var hasAccessibilityAccess = true {
+        didSet { refreshState() }
+    }
+
     init(settings: SettingsStore = .shared) {
         self.settings = settings
         super.init()
@@ -45,6 +49,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     private func buildMenu() {
         menu.delegate = self
+        // Öğelerin etkinliğini kendimiz yönetiyoruz; otomatik doğrulama bunu ezerdi.
+        menu.autoenablesItems = false
 
         enabledItem.target = self
         enabledItem.action = #selector(toggleEnabled)
@@ -134,6 +140,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     private func refreshState() {
         enabledItem.state = settings.isEnabled ? .on : .off
+        enabledItem.isEnabled = hasAccessibilityAccess
+        enabledItem.title = hasAccessibilityAccess ? "Etkin" : "Erişilebilirlik izni gerekiyor"
         launchAtLoginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
 
         let currentDelay = settings.delayMs

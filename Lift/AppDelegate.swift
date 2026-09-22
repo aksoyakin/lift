@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updateChecker.check()
         NotificationCenter.default.addObserver(self, selector: #selector(settingsDidChange), name: SettingsStore.didChangeNotification, object: nil)
         permissions.onAccessGranted = { [weak self] in self?.startEngine() }
+        permissions.onAccessRevoked = { [weak self] in self?.stopEngine() }
         permissions.requestAccess()
     }
 
@@ -36,9 +37,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func startEngine() {
         guard !eventMonitor.isRunning else { return }
         eventMonitor.start()
+        menuBarController?.hasAccessibilityAccess = true
         logger.notice("Motor aktif (gecikme: \(self.settings.delayMs, privacy: .public) ms)")
     }
    
+    private func stopEngine() {
+        eventMonitor.stop()
+        menuBarController?.hasAccessibilityAccess = false
+        logger.notice("Motor durduruldu (AX izni yok)")
+    }
+
     @objc private func settingsDidChange() { engine?.settingsDidChange() }
 
     private static var isRunningUnitTests: Bool { ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil }
