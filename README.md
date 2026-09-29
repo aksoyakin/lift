@@ -74,7 +74,7 @@ belirler. Varsayılan 150 ms çoğu kullanım için dengelidir: istemsiz geçiş
 
 ## Odak ne zaman değişmez
 
-Lift dört durumda odağa dokunmaz. Bunlar uygulamanın kullanılabilir olmasını
+Lift beş durumda odağa dokunmaz. Bunlar uygulamanın kullanılabilir olmasını
 sağlayan asıl özelliklerdir:
 
 | Durum | Davranış |
@@ -82,6 +82,7 @@ sağlayan asıl özelliklerdir:
 | **Sürükleme** | Herhangi bir fare tuşu basılıyken odak değişmez. Dosya sürüklerken üzerinden geçtiğiniz pencereler odak çalmaz. |
 | **Kaydırma** | Kaydırma sonrası 300 ms boyunca odak kilitlenir. Arka plandaki bir pencerede kaydırma yaparken odak kaymaz. |
 | **Yazma** | Son tuş basımından sonra 1 saniye odak kilitlenir. Cümlenin ortasında fareye çarpmak metni başka pencereye göndermez. |
+| **Açılır panel** | Odağı bir balon veya açılır panel tutuyorsa, aynı uygulamanın başka bir penceresine odak geçmez. Chrome'da "Eklentiler" veya "İndirilenler" balonu tıkladığınız düğmenin altında açılır ve imleç düğmenin üzerinde kalır; odak alınsa balon anında kapanırdı. |
 | **Hızlı geçiş** | İmleç pencereler arasında hızlıca geçerken hiçbir şey olmaz. Yalnızca gerçekten durulan pencere odaklanır. |
 
 Kilit süresi dolduğunda imleç hâlâ aynı pencerenin üzerindeyse odak geç de olsa
@@ -173,7 +174,7 @@ derlendiği için menü çubuğu menüsünde gözle görülür takılmaya yol a�
 | `UpdateChecker.swift` | Sürüm karşılaştırma ve GitHub sorgusu |
 
 `FocusEngine` hiçbir somut sınıfa bağlı değildir; yalnızca protokollere. Ekran,
-zaman ve zamanlayıcı bağımlılıkları dışarıdan verilir — bu sayede 33 birim testi
+zaman ve zamanlayıcı bağımlılıkları dışarıdan verilir — bu sayede 44 birim testi
 ekranda pencere açmadan ve gerçek zaman beklemeden, milisaniyeler içinde çalışır.
 
 ```sh
