@@ -24,6 +24,7 @@ final class EventMonitor {
     private let clock: MonotonicClock
     private var monitor: Any?
     private var lastMoveDispatch: TimeInterval?
+    private var pressedButtons: Set<Int> = []
 
     init(clock: MonotonicClock = SystemClock()) {
         self.clock = clock
@@ -42,11 +43,15 @@ final class EventMonitor {
         }
     }
 
+    // Durdurulurken basılı tuş kaydı da silinir: aksi halde monitör sürükleme
+    // sırasında durdurulup yeniden başlatılırsa hiç görülmemiş bir bırakma
+    // beklenir ve sürükleme kilidi kalıcı olarak açık kalırdı.
     func stop() {
+        lastMoveDispatch = nil
+        pressedButtons.removeAll()
         guard let monitor else { return }
         NSEvent.removeMonitor(monitor)
         self.monitor = nil
-        lastMoveDispatch = nil
     }
 
     private func handle(_ event: NSEvent) {
@@ -54,9 +59,9 @@ final class EventMonitor {
         case .mouseMoved:
             handleMouseMoved()
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            delegate?.eventMonitorDidBeginDrag(self)
+            buttonPressed(event.buttonNumber)
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            delegate?.eventMonitorDidEndDrag(self)
+            buttonReleased(event.buttonNumber)
         case .scrollWheel:
             delegate?.eventMonitorDidScroll(self)
         case .keyDown, .flagsChanged:
@@ -64,6 +69,23 @@ final class EventMonitor {
         default:
             break
         }
+    }
+
+    // Sürükleme ilk tuş basılınca başlar, son tuş bırakılınca biter. Her basımı
+    // başlangıç, her bırakmayı bitiş saymak sol tuşla dosya sürüklerken sağ tuşa
+    // basıp bırakmayı sürüklemenin sonu sanmak demekti; kilit düşer ve dosya
+    // hâlâ elde dolaşırken odak kayardı. Basımı görülmemiş bir tuşun bırakılması
+    // (monitör sürükleme ortasında başladıysa) yok sayılır.
+    func buttonPressed(_ button: Int) {
+        let wasIdle = pressedButtons.isEmpty
+        pressedButtons.insert(button)
+        guard wasIdle else { return }
+        delegate?.eventMonitorDidBeginDrag(self)
+    }
+
+    func buttonReleased(_ button: Int) {
+        guard pressedButtons.remove(button) != nil, pressedButtons.isEmpty else { return }
+        delegate?.eventMonitorDidEndDrag(self)
     }
 
     private func handleMouseMoved() {
