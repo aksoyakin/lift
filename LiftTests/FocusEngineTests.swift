@@ -145,6 +145,64 @@ final class FocusEngineTests: XCTestCase {
         XCTAssertEqual(actions.focusCalls.first?.pid, 101)
     }
 
+    // MARK: - Geçici pencereler (balon, açılır panel)
+
+    // Chrome'da "Eklentiler"e tıklayınca balon düğmenin altında açılır, imleç
+    // tıkladığı düğmenin üzerinde — yani ana pencerede — kalır. Lift ana
+    // pencereyi hedefleyip odağı alınca balon kendini kapatıyordu.
+    func testDoesNotStealFocusFromTransientWindowOfTheSameApp() {
+        actions.focused = windowA
+        actions.focusedPid = 101
+        actions.focusedIsTransient = true
+        resolver.result = target(TestWindows.alternate(), pid: 101)
+
+        moveMouse()
+
+        XCTAssertFalse(debouncer.hasPendingAction, "Balon odaktayken odaklama planlanmamalı")
+        XCTAssertTrue(actions.focusCalls.isEmpty)
+    }
+
+    // Kısıt yalnızca balonun sahibi uygulamayı bağlar; aksi halde odağı
+    // bırakmayan bir panel Lift'i tümden durdurabilirdi.
+    func testStillFollowsPointerToOtherAppsWhileTransientWindowHoldsFocus() {
+        actions.focused = windowA
+        actions.focusedPid = 101
+        actions.focusedIsTransient = true
+        resolver.result = target(windowB, pid: 202)
+
+        moveMouse()
+        XCTAssertTrue(debouncer.fire())
+
+        XCTAssertEqual(actions.focusCalls.count, 1, "Başka uygulamaya geçiş serbest kalmalı")
+        XCTAssertEqual(actions.focusCalls.first?.pid, 202)
+    }
+
+    // Balon, imleç beklerken açılabilir; süre dolduğunda karar yenilenmeli.
+    func testTransientWindowAppearingDuringDebounceCancelsTheFocus() {
+        resolver.result = target(windowA, pid: 101)
+        moveMouse()
+        XCTAssertTrue(debouncer.hasPendingAction)
+
+        actions.focused = TestWindows.alternate()
+        actions.focusedPid = 101
+        actions.focusedIsTransient = true
+
+        XCTAssertTrue(debouncer.fire())
+        XCTAssertTrue(actions.focusCalls.isEmpty, "Süre dolarken balon açıldıysa odak alınmamalı")
+    }
+
+    func testOrdinaryWindowOfTheSameAppIsStillAValidTarget() {
+        actions.focused = windowA
+        actions.focusedPid = 101
+        actions.focusedIsTransient = false
+        resolver.result = target(TestWindows.alternate(), pid: 101)
+
+        moveMouse()
+        XCTAssertTrue(debouncer.fire())
+
+        XCTAssertEqual(actions.focusCalls.count, 1)
+    }
+
     // MARK: - Sürükleme kilidi
 
     func testDragCancelsPendingFocusAndBlocksNewOnes() {

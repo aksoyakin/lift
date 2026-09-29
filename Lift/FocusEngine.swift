@@ -141,7 +141,7 @@ final class FocusEngine: EventMonitorDelegate {
             cancelPending()
             return
         }
-        guard !isAlreadyFocused(target.element) else {
+        guard !shouldKeepCurrentFocus(target: target) else {
             cancelPending()
             return
         }
@@ -167,7 +167,7 @@ final class FocusEngine: EventMonitorDelegate {
         // Süre dolduğunda imlecin hâlâ aynı pencerede olduğu yeniden doğrulanır.
         guard let current = resolver.window(at: pointer.location()),
               CFEqual(current.element, target) else { return }
-        guard !isAlreadyFocused(current.element) else { return }
+        guard !shouldKeepCurrentFocus(target: current) else { return }
 
         logger.debug("Odak değişiyor (pid: \(current.pid, privacy: .public))")
         actions.focus(current.element, ownedBy: current.pid)
@@ -184,9 +184,23 @@ final class FocusEngine: EventMonitorDelegate {
         return remaining > 0 ? remaining : nil
     }
 
-    private func isAlreadyFocused(_ window: AXUIElement) -> Bool {
+    // Tek AX sorgusuyla iki soru; ikisinin de cevabı "odağa dokunma".
+    //
+    // Hedef zaten odaklıysa yazmanın anlamı yok. İkinci durum daha incedir:
+    // odağı geçici bir pencere tutuyorsa ve hedef aynı uygulamanın başka bir
+    // penceresiyse odak alınmaz. Chrome'da "Eklentiler" düğmesine tıklayınca
+    // balon düğmenin altında açılır, imleç ise tıkladığı düğmenin üzerinde —
+    // yani ana pencerede — kalır. Tıklamanın kendisi değerlendirme tetiklediği
+    // için Lift ana pencereyi hedef sayıp odağı ondan alıyor, balon da odağını
+    // yitirdiği anda kapanıyordu.
+    //
+    // Kısıt bilerek aynı uygulamayla sınırlı: başka bir uygulamanın penceresine
+    // geçmek serbest kalır. Aksi halde odağı bırakmayan bir açılır panel Lift'i
+    // sessizce tümden durdurabilirdi.
+    private func shouldKeepCurrentFocus(target: ResolvedWindow) -> Bool {
         guard let focused = actions.focusedWindow() else { return false }
-        return CFEqual(focused, window)
+        if CFEqual(focused.element, target.element) { return true }
+        return focused.isTransient && focused.pid == target.pid
     }
 
     private func cancelPending() {

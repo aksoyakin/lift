@@ -7,6 +7,23 @@ struct ResolvedWindow {
     let pid: pid_t
 }
 
+// Odaklanabilir pencere tanımı tek yerde. Aynı ölçüt iki yönde de geçerli:
+// böyle olmayan bir pencere hedef seçilmez (WindowResolver) ve odağı böyle bir
+// pencere tutuyorsa odak ondan alınmaz (FocusActions + FocusEngine). Chrome'un
+// "Eklentiler" balonu AXUnknown alt rolüyle gelir ve odağı kaybettiği anda
+// kendini kapatır.
+enum WindowClassification {
+    static let focusableSubroles: Set<String> = [
+        kAXStandardWindowSubrole as String,
+        kAXDialogSubrole as String,
+    ]
+
+    static func isFocusable(subrole: String?) -> Bool {
+        guard let subrole else { return false }
+        return focusableSubroles.contains(subrole)
+    }
+}
+
 protocol WindowResolving: AnyObject {
     func window(at cocoaPoint: CGPoint) -> ResolvedWindow?
 }
@@ -21,11 +38,6 @@ final class SystemPointerLocator: PointerLocating {
 
 final class WindowResolver: WindowResolving {
     private static let maxParentWalkDepth = 12
-
-    private static let focusableSubroles: Set<String> = [
-        kAXStandardWindowSubrole as String,
-        kAXDialogSubrole as String,
-    ]
 
     private static let deadEndRoles: Set<String> = [
         kAXMenuRole as String,
@@ -121,7 +133,7 @@ final class WindowResolver: WindowResolving {
             Self.diagnostics.debug("elendi: pencere küçültülmüş")
             return false
         }
-        guard let subrole, Self.focusableSubroles.contains(subrole) else {
+        guard WindowClassification.isFocusable(subrole: subrole) else {
             Self.diagnostics.debug("elendi: uygun olmayan subrole=\(subrole ?? "<yok>", privacy: .public)")
             return false
         }

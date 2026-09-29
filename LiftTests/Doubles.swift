@@ -25,17 +25,23 @@ final class MockWindowResolver: WindowResolving {
 
 final class MockFocusActions: FocusPerforming {
     var focused: AXUIElement?
+    var focusedPid: pid_t = 0
+    var focusedIsTransient = false
+
     private(set) var focusedWindowQueryCount = 0
     private(set) var focusCalls: [(window: AXUIElement, pid: pid_t)] = []
 
-    func focusedWindow() -> AXUIElement? {
+    func focusedWindow() -> FocusedWindow? {
         focusedWindowQueryCount += 1
-        return focused
+        guard let focused else { return nil }
+        return FocusedWindow(element: focused, pid: focusedPid, isTransient: focusedIsTransient)
     }
 
     func focus(_ window: AXUIElement, ownedBy pid: pid_t) {
         focusCalls.append((window, pid))
         focused = window
+        focusedPid = pid
+        focusedIsTransient = false
     }
 }
 
