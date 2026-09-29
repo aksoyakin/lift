@@ -26,7 +26,7 @@ karar vermek.**
 ### Homebrew ile
 
 ```sh
-brew install --cask aksoyakin/lift/lift
+brew install --cask aksoyakin/tap/lift
 ```
 
 Güncellemek için `brew upgrade --cask lift`.

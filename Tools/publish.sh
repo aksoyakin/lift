@@ -12,9 +12,9 @@ set -euo pipefail
 
 VERSION="${1:-}"
 REPO="aksoyakin/lift"
-TAP_REPO="aksoyakin/homebrew-lift"
+TAP_REPO="aksoyakin/homebrew-tap"
 # brew komutlarında tap adı "homebrew-" öneki olmadan yazılır.
-TAP_NAME="aksoyakin/lift"
+TAP_NAME="aksoyakin/tap"
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DMG="$PROJECT_ROOT/build/Lift-$VERSION.dmg"
